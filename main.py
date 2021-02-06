@@ -1,27 +1,28 @@
 import sys
 import sqlite3
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-
+from PyQt5 import uic
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidget, QTableWidgetItem
 EDIT_MODE = 1
 ADD_MODE = 0
+from addEditCoffeeForm import Ui_MainWindow as addEditCoffeeForm
+from mainui import Ui_Form as mainui
 
-
-class MyWidget(QMainWindow):
+class MyWidget(QMainWindow, mainui):
     def __init__(self):
         super().__init__()
+        self.setupUi(self)
         self.init_ui()
         self.setWindowTitle('Капучино')
         self.setGeometry(300, 100, 800, 800)
 
 
     def load_data(self):
-        con = sqlite3.connect('coffee.splite.db')
+        con = sqlite3.connect('data/coffee.splite.db')
         cur = con.cursor()
         self.data = cur.execute("""SELECT * FROM espresso""").fetchall()
 
     def init_ui(self):
-        uic.loadUi('main.ui', self)
+        # uic.loadUi('main.ui', self)
         self.addBut.clicked.connect(self.addcoffe)
         self.editBut.clicked.connect(self.editcoffe)
         self.load_data()
@@ -61,13 +62,14 @@ class MyWidget(QMainWindow):
         self.w2.show()
 
 
-class MyWidget2(QMainWindow):
+class MyWidget2(QMainWindow, addEditCoffeeForm):
     def __init__(self, mode, index_id):
         self.index_id, self.mode = int(index_id), int(mode)
         self.button_text = ('Добавить', 'Изменить', 'Удалить')
         self.header_text = ('Добавление кофе', 'Изменение кофе', 'Удаление кофе')
         super().__init__()
-        uic.loadUi('addEditCoffeeForm.ui', self)
+        self.setupUi(self)
+        # uic.loadUi('addEditCoffeeForm.ui', self)
         self.setWindowTitle(self.header_text[self.mode])
         self.pushButton.setText(self.button_text[self.mode])
         self.pushButton.clicked.connect(self.run)
@@ -76,7 +78,7 @@ class MyWidget2(QMainWindow):
 
     def LoadCurrentCoffe(self, index):
         # print(index)
-        self.con = sqlite3.connect("coffee.splite.db")
+        self.con = sqlite3.connect("data/coffee.splite.db")
         cur = self.con.cursor()
         index = int(index)
         result = cur.execute(f"""SELECT DISTINCT * FROM espresso WHERE id = '{index}'""").fetchall()
@@ -90,15 +92,14 @@ class MyWidget2(QMainWindow):
         self.V.setText(str(result[0][6]))
         
     def run(self):
-                
         title = str(self.title.text())
         roast_degree = str(self.roast_degree.text())
         type_ = str(self.type.text())
         taste = str(self.taste.text())
-        price = int(self.price.text())
+        price = str(self.price.text())
         v = str(self.V.text())
         
-        self.con = sqlite3.connect("coffee.splite.db")
+        self.con = sqlite3.connect("data/coffee.splite.db")
         cur = self.con.cursor()
         if self.mode == ADD_MODE:
             result = cur.execute("""SELECT DISTINCT id FROM espresso ORDER BY id DESC""").fetchone()
